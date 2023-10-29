@@ -5,14 +5,7 @@ import {
 export function createStore() {
   return _createStore({
     state: {
-      taverns: [
-        {
-          Name: "The Merry Mug",
-          Size: 50,
-          Quality: "Excellent",
-          Bartender: "Gideon Stonebrew"
-        }
-      ],
+      taverns: [],
       magicShops: []
     },
     mutations: {

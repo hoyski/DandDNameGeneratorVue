@@ -1,6 +1,8 @@
 <template>
   <div class="taverns-container">
-    <button @click="generateNewTavern">Generate Tavern</button>
+    <div v-if="generating">Generating...</div>
+    <button v-else @click="generateNewTavern">Generate Tavern</button>
+
     <table>
       <thead>
         <tr>
@@ -27,18 +29,56 @@
 </template>
 
 <script>
+import OpenAI from "openai";
+
 export default {
+  data() {
+    return {
+      generating: false
+    }
+  },
   components: {},
   methods: {
-    generateNewTavern() {
-      let newTavern = {
-        Name: "The Broken Promise",
-        Size: 50,
-        Quality: "Poor",
-        Bartender: "Feld",
-      };
+    async generateNewTavern() {
 
-      this.$store.commit("ADD_TAVERN", newTavern);
+      this.generating = true;
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+        dangerouslyAllowBrowser: true,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a dungeon master creating a new campaign",
+          },
+          {
+            role: "user",
+            content: `Generate a tavern with the following properties and return the results as a JSON object.
+
+            Tavern: Generate a fantasy tavern with the list of parameters below
+            Name - Name of said tavern
+            Size - Number of people in the tavern
+            Quality - Quality of said tavern
+            Bartender - Name of this tavern's bartender
+            `,
+          },
+        ],
+        temperature: 1,
+        max_tokens: 256,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      });
+
+      const tavernInfo = JSON.parse(response.choices[0].message.content);
+
+      this.$store.commit("ADD_TAVERN", tavernInfo);
+
+      this.generating = false;
     },
   },
 };
@@ -55,6 +95,6 @@ thead > tr > td {
 }
 
 tr:nth-child(even) {
-  background-color: #F0F0F0;
+  background-color: #f0f0f0;
 }
 </style>

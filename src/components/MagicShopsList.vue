@@ -7,19 +7,11 @@
 <script>
 export default {
   props: {
-    magicShop: Object
+    magicShop: Object,
   },
-  methods: {
-  }
-}
+  methods: {},
+};
 </script>
 
-<style>
-.magicShop {
-  border: 2px solid black;
-  border-radius: 10px;
-  width: 250px;
-  height: 550px;
-  margin: 20px;
-}
+<style scoped>
 </style>
