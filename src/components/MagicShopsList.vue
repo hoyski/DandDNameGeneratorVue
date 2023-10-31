@@ -1,6 +1,6 @@
 <template>
   <div class="magicShop">
-    Magic Shops will, uh, magically appear here one day
+    Magic Shops will, uh, magically appear here one day, yeah
   </div>
 </template>
 
@@ -14,4 +14,7 @@ export default {
 </script>
 
 <style scoped>
+  .magicShop {
+    font-size: 40px;
+  }
 </style>

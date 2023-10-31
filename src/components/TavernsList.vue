@@ -15,9 +15,10 @@
       <tbody>
         <tr
           class="tavern-row"
-          v-for="tavern in $store.state.taverns"
-          :key="tavern.Name"
         >
+
+
+
           <td>{{ tavern.Name }}</td>
           <td>{{ tavern.Size }}</td>
           <td>{{ tavern.Quality }}</td>
@@ -34,7 +35,8 @@ import OpenAI from "openai";
 export default {
   data() {
     return {
-      generating: false
+      generating: false,
+      tavern: {}
     }
   },
   components: {},
@@ -74,9 +76,9 @@ export default {
         presence_penalty: 0,
       });
 
-      const tavernInfo = JSON.parse(response.choices[0].message.content);
+      this.tavern = JSON.parse(response.choices[0].message.content);
 
-      this.$store.commit("ADD_TAVERN", tavernInfo);
+      //this.$store.commit("ADD_TAVERN", tavernInfo);
 
       this.generating = false;
     },

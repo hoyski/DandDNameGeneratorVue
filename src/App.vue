@@ -12,7 +12,7 @@
 export default {};
 </script>
 
-<style>
+<style scoped>
 #namegen-app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -20,5 +20,13 @@ export default {};
   text-align: center;
   color: #2c3e50;
   margin: 60px;
+}
+a {
+  color: #404040;
+  width: 20vw;
+}
+nav {
+  height: 20vh;
+  width: 100vw;
 }
 </style>
