@@ -6,7 +6,7 @@
     <div v-if="generating">Generating...</div>
     <button v-else @click="generateNewTavern">Generate Tavern</button>
 
-    <input type="text" v-model="setting">
+    <input type="text" v-model="setting" />
 
     <table>
       <thead>
@@ -22,7 +22,6 @@
       </thead>
       <tbody>
         <tr class="tavern-row">
-
           <td>{{ tavern.Name }}</td>
           <td>{{ tavern.Size }}</td>
           <td>{{ tavern.Quality }}</td>
@@ -30,17 +29,26 @@
           <td>{{ tavern.Bartender.Race }}</td>
           <td>{{ tavern.Bartender.Gender }}</td>
           <td>{{ tavern.Bartender.Age }}</td>
-
-
         </tr>
       </tbody>
     </table>
+
     <div class="races">
-      <div class="race" v-for="curRace, index in races" v-bind:key="index">
-        <div>
+      <div class="race" v-for="(curRace, index) in races" v-bind:key="index">
+        <div
+          v-bind:id="'race_' + index"
+          contenteditable="true"
+          spellcheck="false"
+          @blur="handleRaceChange(index)"
+        >
           {{ curRace.race }}
         </div>
-        <div>
+        <div
+          v-bind:id="'weight_' + index"
+          contenteditable="true"
+          spellcheck="false"
+          @blur="handleWeightChange(index)"
+        >
           {{ curRace.weight }}
         </div>
         <div>
@@ -48,21 +56,18 @@
         </div>
       </div>
       <div class="newRace race">
-        <input type="text" v-model="newRace.race">
+        <input class="raceInput" type="text" v-model="newRace.race" />
         <br />
-        <input type="number" v-model="newRace.weight">
+        <input class="raceInput" type="number" v-model="newRace.weight" />
         <br />
         <button v-on:click="addRace">+</button>
       </div>
     </div>
-    <p>
-
-    </p>
+    <p></p>
   </div>
 </template>
 
 <script>
-
 import OpenAI from "openai";
 
 export default {
@@ -70,17 +75,17 @@ export default {
     return {
       generating: false,
       tavern: {
-        "Name": "",
-        "Size": 0,
-        "Quality": "",
-        "Bartender": {
-          "Name": "",
-          "Race": "",
-          "Gender": "",
-          "Age": 0
-        }
+        Name: "",
+        Size: 0,
+        Quality: "",
+        Bartender: {
+          Name: "",
+          Race: "",
+          Gender: "",
+          Age: 0,
+        },
       },
-      setting: 'Fantasy',
+      setting: "Fantasy",
       tavernSmells: [
         "Pine",
         "Smoke",
@@ -114,37 +119,36 @@ export default {
         "Oak",
         "Aspen",
         "Acacia",
-        "Potato"
+        "Potato",
       ],
-      selectedSmell: '',
+      selectedSmell: "",
       races: [
         {
-          race: 'human',
-          weight: 50
+          race: "human",
+          weight: 50,
         },
         {
-          race: 'elf',
-          weight: 20
+          race: "elf",
+          weight: 20,
         },
         {
-          race: 'dwarf',
-          weight: 12
+          race: "dwarf",
+          weight: 12,
         },
         {
-          race: 'dragonborn',
-          weight: 14
-        }
+          race: "dragonborn",
+          weight: 14,
+        },
       ],
       newRace: {
-        race: '',
-        weight: 0
-      }
-    }
+        race: "",
+        weight: 0,
+      },
+    };
   },
   components: {},
   methods: {
     async generateNewTavern() {
-
       this.generating = true;
 
       this.generateTheming();
@@ -200,7 +204,6 @@ Use this as the framework for your response
       //this.$store.commit("ADD_TAVERN", tavernInfo);
 
       this.generating = false;
-
     },
     generateTheming() {
       let pickedRace = this.pickWeightedRace();
@@ -208,44 +211,58 @@ Use this as the framework for your response
       this.selectedSmell = this.tavernSmells[smellNumber];
       console.log(this.selectedSmell);
       console.log(pickedRace.race);
-
     },
     pickWeightedRace() {
-    let raceTotal = 0;
-    for (let i = 0; i < this.races.length; i++) {
-      raceTotal += this.races[i].weight;
-    }
-
-    const raceThreshold = Math.floor(Math.random() * raceTotal);
-
-    raceTotal = 0;
-    for (let i = 0; i < this.races.length - 1; i++) {
-      raceTotal += this.races[i].weight;
-
-      if (raceTotal >= raceThreshold) {
-        return this.races[i];
+      let raceTotal = 0;
+      for (let i = 0; i < this.races.length; i++) {
+        raceTotal += this.races[i].weight;
       }
-    }
-    return this.races[this.races.length - 1];
-  },
-  addRace() {
-    if (this.newRace.race == '') {
-      return;
-    }
-    let newRaceCopy = {};
-    newRaceCopy.race = this.newRace.race;
-    newRaceCopy.weight = this.newRace.weight;
-    this.races.push(newRaceCopy);
-    this.newRace.race = '';
-    this.newRace.weight = 0;
-  },
-  removeRace(index) {
-    console.log("Remove Race " + index);
-    this.races.splice(index, 1);
-  }
-  },
-}
 
+      const raceThreshold = Math.floor(Math.random() * raceTotal);
+
+      raceTotal = 0;
+      for (let i = 0; i < this.races.length - 1; i++) {
+        raceTotal += this.races[i].weight;
+
+        if (raceTotal >= raceThreshold) {
+          return this.races[i];
+        }
+      }
+      return this.races[this.races.length - 1];
+    },
+    addRace() {
+      if (this.newRace.race == "") {
+        return;
+      }
+      let newRaceCopy = {};
+      newRaceCopy.race = this.newRace.race;
+      newRaceCopy.weight = this.newRace.weight;
+      this.races.push(newRaceCopy);
+      this.newRace.race = "";
+      this.newRace.weight = 0;
+    },
+    removeRace(index) {
+      console.log("Remove Race " + index);
+      this.races.splice(index, 1);
+    },
+    handleRaceChange(index) {
+      console.log(`Handling race change for idx ${index}`);
+      let raceElem = document.getElementById("race_" + index);
+      this.races[index].race = raceElem.innerText;
+    },
+    handleWeightChange(index) {
+      console.log(`Handling weight change for idx ${index}`);
+      let weightElem = document.getElementById("weight_" + index);
+      // Ensure a valid number has been entered. If not, set the weight back to its current
+      // value from the array
+      if (isNaN(parseInt(weightElem.innerText))) {
+        weightElem.innerText = this.races[index].weight;
+      } else {
+        this.races[index].weight = parseInt(weightElem.innerText);
+      }
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -254,7 +271,7 @@ table {
   border-spacing: 0;
 }
 
-thead>tr>td {
+thead > tr > td {
   font-weight: bold;
 }
 
@@ -275,5 +292,9 @@ tr:nth-child(even) {
   margin: 20px;
   padding: 5px;
   width: 14%;
+}
+
+.raceInput {
+  width: 85%;
 }
 </style>
