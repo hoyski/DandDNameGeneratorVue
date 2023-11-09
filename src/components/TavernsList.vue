@@ -303,6 +303,6 @@ tr:nth-child(even) {
 }
 
 .raceInput {
-  width: 85%;
+  width: 75%;
 }
 </style>
