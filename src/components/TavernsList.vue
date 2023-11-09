@@ -35,20 +35,10 @@
 
     <div class="races">
       <div class="race" v-for="(curRace, index) in races" v-bind:key="index">
-        <div
-          v-bind:id="'race_' + index"
-          contenteditable="true"
-          spellcheck="false"
-          @blur="handleRaceChange(index)"
-        >
+        <div v-bind:id="'race_' + index" contenteditable="true" spellcheck="false" @blur="handleRaceChange(index)">
           {{ curRace.race }}
         </div>
-        <div
-          v-bind:id="'weight_' + index"
-          contenteditable="true"
-          spellcheck="false"
-          @blur="handleWeightChange(index)"
-        >
+        <div v-bind:id="'weight_' + index" contenteditable="true" spellcheck="false" @blur="handleWeightChange(index)">
           {{ curRace.weight }}
         </div>
         <div>
@@ -122,24 +112,7 @@ export default {
         "Potato",
       ],
       selectedSmell: "",
-      races: [
-        {
-          race: "human",
-          weight: 50,
-        },
-        {
-          race: "elf",
-          weight: 20,
-        },
-        {
-          race: "dwarf",
-          weight: 12,
-        },
-        {
-          race: "dragonborn",
-          weight: 14,
-        },
-      ],
+      races: [],
       newRace: {
         race: "",
         weight: 0,
@@ -240,15 +213,18 @@ Use this as the framework for your response
       this.races.push(newRaceCopy);
       this.newRace.race = "";
       this.newRace.weight = 0;
+      this.addToLocalStorage();
     },
     removeRace(index) {
       console.log("Remove Race " + index);
       this.races.splice(index, 1);
+      this.addToLocalStorage();
     },
     handleRaceChange(index) {
       console.log(`Handling race change for idx ${index}`);
       let raceElem = document.getElementById("race_" + index);
       this.races[index].race = raceElem.innerText;
+      this.addToLocalStorage();
     },
     handleWeightChange(index) {
       console.log(`Handling weight change for idx ${index}`);
@@ -259,9 +235,41 @@ Use this as the framework for your response
         weightElem.innerText = this.races[index].weight;
       } else {
         this.races[index].weight = parseInt(weightElem.innerText);
+        this.addToLocalStorage();
       }
     },
+    addToLocalStorage() {
+      let racesString = JSON.stringify(this.races);
+      localStorage.setItem("races", racesString);
+    }
   },
+  created() {
+    if (!localStorage.getItem("races")) {
+      //no races then saet to default
+      this.races = [
+        {
+          race: "human",
+          weight: 50,
+        },
+        {
+          race: "elf",
+          weight: 20,
+        },
+        {
+          race: "dwarf",
+          weight: 12,
+        },
+        {
+          race: "dragonborn",
+          weight: 14,
+        },
+      ];
+    }
+    else {
+      let racesString = localStorage.getItem("races");
+      this.races = JSON.parse(racesString);
+    }
+  }
 };
 </script>
 
@@ -271,7 +279,7 @@ table {
   border-spacing: 0;
 }
 
-thead > tr > td {
+thead>tr>td {
   font-weight: bold;
 }
 
