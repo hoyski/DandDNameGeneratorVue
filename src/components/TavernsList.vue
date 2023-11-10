@@ -24,8 +24,9 @@
         <tr class="tavern-row">
           <td>{{ tavern.Name }}</td>
           <td>{{ tavern.Size }}</td>
-          <td>{{ tavern.Quality }}</td>
-          <td>{{ tavern.Bartender.Name }}</td>
+          <td>Cleanliness: {{ tavern.Quality.Cleanliness }} Drinks: {{ tavern.Quality.Drinks }} </td>
+          <td>Name: {{ tavern.Bartender.Name.bartenderName }} Pronounciation: {{ tavern.Bartender.Name.phoneticSpelling }}
+          </td>
           <td>{{ tavern.Bartender.Race }}</td>
           <td>{{ tavern.Bartender.Gender }}</td>
           <td>{{ tavern.Bartender.Age }}</td>
@@ -55,6 +56,9 @@
     </div>
     <p></p>
   </div>
+  <div class="buttonStyle">
+    A little text in the middle.
+  </div>
 </template>
 
 <script>
@@ -75,6 +79,7 @@ export default {
           Age: 0,
         },
       },
+      taverns: [],
       setting: "Fantasy",
       tavernSmells: [
         "Pine",
@@ -111,6 +116,42 @@ export default {
         "Acacia",
         "Potato",
       ],
+      nameTypes: [
+        "Nordic",
+        "Elvish",
+        "Norwegian",
+        "Dwarvish",
+        "Draconic",
+        "Gnomish",
+        "French",
+        "English"
+      ],
+      genders: [
+        {
+          gender: "male",
+          weight: 45,
+        },
+        {
+          gender: "female",
+          weight: 45,
+        },
+        {
+          gender: "both",
+          weight: 5,
+        },
+        {
+          gender: "neither",
+          weight: 5,
+        }
+      ],
+      styles: [
+        "Gothic",
+        "Victorian",
+        "Roman",
+        "German",
+        "Brutalist",
+        "Rustic"
+      ],
       selectedSmell: "",
       races: [],
       newRace: {
@@ -140,25 +181,26 @@ export default {
           },
           {
             role: "user",
-            content: `Generate a tavern with the following properties and return the results as a JSON object.
-
-Tavern: Generate a fantasy tavern with the list of parameters and the following caveats of each parameter this tavern also has some unique properties so please keep those in mind when generating this tavern, this tavern smells of ${this.selectedSmell}
+            content: `Tavern: Generate a ${this.setting} tavern with the list of parameters and the following caveats of each parameter this tavern also has some unique properties so please keep those in mind when generating this tavern, this tavern smells of ${this.selectedSmell}
 
 Name - Name of said tavern (Caveat: no animal related names including mythical creatures)
 Size - Amount of people in the tavern (Caveat: come up with a random number 5 - 40)
-Quality - Quality of said tavern (Caveat: describe the quality both of how clean the tavern is and the good the drinks are keep this description short)
-Bartender - Name of this tavern's bartender (Caveat: include in this order name, race, gender, age. Make these a JSON object)
+Quality - Quality of said tavern (Caveat: scale from 1 - 10 on cleanliness and 1 - 10 drinks)
+Bartender - Name of this tavern's bartender (Caveat: Use ${this.selectedName} names as inspiration. Give a first and last name. Followed by a phonetic spelling. This bartenders gender is ${this.pickedGender})
 
-Use this as the framework for your response
+Return as a JSON object using this framework as a response
 {
 "Name": "",
   "Size": 0,
-  "Quality": "",
+  "Quality": {
+"Cleanliness": 0,
+"Drinks": 0
+}
   "Bartender": {
-    "Name": "",
-    "Race": "",
-    "Gender": "",
-    "Age": 0
+    "Name": {
+"bartenderName":"",
+"phoneticSpelling":""
+}
   }
 }
             `,
@@ -171,19 +213,39 @@ Use this as the framework for your response
         presence_penalty: 0,
       });
 
-      console.log(response.choices[0].message.content);
       this.tavern = JSON.parse(response.choices[0].message.content);
+      let bartenderAges = this.ages;
+      this.tavern.Bartender.Age = bartenderAges;
+      console.log(response.choices[0].message.content);
+      let bartenderRace = this.pickedRace.race;
+      this.tavern.Bartender.Race = bartenderRace;
+      this.tavern.Bartender.Gender = this.pickedGender;
+
+
 
       //this.$store.commit("ADD_TAVERN", tavernInfo);
 
+      this.taverns.push(this.tavern);
+      let tavernsString = JSON.stringify(this.taverns);
+      localStorage.setItem("taverns", tavernsString);
+
       this.generating = false;
+      
+
+
     },
     generateTheming() {
-      let pickedRace = this.pickWeightedRace();
+      this.pickedRace = this.pickWeightedRace();
+      this.pickedGender = this.pickGender().gender;
       let smellNumber = Math.floor(Math.random() * this.tavernSmells.length);
+      this.pickAges();
+      this.pickNaming();
       this.selectedSmell = this.tavernSmells[smellNumber];
-      console.log(this.selectedSmell);
-      console.log(pickedRace.race);
+      // console.log(this.selectedSmell);
+      // console.log(pickedRace.race);
+      this.pickGender();
+      console.log(this.ages);
+      console.log(this.pickedGender);
     },
     pickWeightedRace() {
       let raceTotal = 0;
@@ -202,6 +264,31 @@ Use this as the framework for your response
         }
       }
       return this.races[this.races.length - 1];
+    },
+    pickAges() {
+      this.ages = Math.floor(Math.random() * 80) + 16;
+      // console.log(ages);
+    },
+    pickNaming() {
+      let nameType = Math.floor(Math.random() * this.nameTypes.length);
+      this.selectedName = this.nameTypes[nameType];
+    },
+    pickGender() {
+      let genderTotal = 0;
+      for (let i = 0; i < this.genders.length; i++) {
+        genderTotal += this.genders[i].weight;
+      }
+      const genderThreshold = Math.floor(Math.random() * genderTotal);
+
+      genderTotal = 0;
+      for (let i = 0; i < this.genders.length - 1; i++) {
+        genderTotal += this.genders[i].weight;
+
+        if (genderTotal >= genderThreshold) {
+          return this.genders[i];
+        }
+      }
+      return this.genders[this.genders.length - 1];
     },
     addRace() {
       if (this.newRace.race == "") {
@@ -241,7 +328,7 @@ Use this as the framework for your response
     addToLocalStorage() {
       let racesString = JSON.stringify(this.races);
       localStorage.setItem("races", racesString);
-    }
+    },
   },
   created() {
     if (!localStorage.getItem("races")) {
@@ -269,7 +356,15 @@ Use this as the framework for your response
       let racesString = localStorage.getItem("races");
       this.races = JSON.parse(racesString);
     }
-  }
+
+    if(!localStorage.getItem("taverns")){
+      this.taverns = [];
+    }
+    else{
+      let tavernsString = localStorage.getItem("taverns");
+      this.taverns = JSON.parse(tavernsString);
+    }
+  },
 };
 </script>
 
@@ -303,6 +398,13 @@ tr:nth-child(even) {
 }
 
 .raceInput {
-  width: 75%;
+  width: 85%;
+}
+
+.buttonStyle{
+  background-color: #000040;
+  width: 40%;
+  color: #FFFFFF;
+  height: 50px;
 }
 </style>
