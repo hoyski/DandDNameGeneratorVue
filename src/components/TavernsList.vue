@@ -54,15 +54,34 @@
         <button v-on:click="addRace">+</button>
       </div>
     </div>
-    <p></p>
-  </div>
-  <div class="buttonStyle">
-    A little text in the middle.
+    <div class="previousTaverns">
+      <div class="taverns" v-for="(curTavern, index) in taverns" v-bind:key="index">
+        <div class="tavernsInfo">
+          <div v-bind:id="'name_' + index" contenteditable="true" spellcheck="false">
+            {{ curTavern.Name }}
+          </div>
+          <div v-bind:id="'bartender_' + index" contenteditable="true" spellcheck="false">
+            {{ curTavern.Bartender.Name.bartenderName }}
+          </div>
+          <div v-bind:id="'name_' + index" contenteditable="true" spellcheck="false">
+            {{ curTavern.Bartender.Name.phoneticSpelling }}
+          </div>
+          <div v-bind:id="'name_' + index" contenteditable="true" spellcheck="false">
+            {{ curTavern.Size }}
+          </div>
+          <div v-bind:id="'name_' + index" contenteditable="true" spellcheck="false">
+            {{ curTavern.Bartender.Race }}
+          </div>
+          <button v-on:click="removeTavern(index)">Remove</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import OpenAI from "openai";
+import { FineTuningJobsPage } from "openai/resources/fine-tuning/jobs";
 
 export default {
   data() {
@@ -81,6 +100,8 @@ export default {
       },
       taverns: [],
       setting: "Fantasy",
+      agePicked: 0,
+      pickedMinimum: 0,
       tavernSmells: [
         "Pine",
         "Smoke",
@@ -144,6 +165,109 @@ export default {
           weight: 5,
         }
       ],
+      ages: [
+        { "age": 0, "weight": 0 },
+        { "age": 1, "weight": 5 },
+        { "age": 2, "weight": 10 },
+        { "age": 3, "weight": 20 },
+        { "age": 4, "weight": 35 },
+        { "age": 5, "weight": 50 },
+        { "age": 6, "weight": 65 },
+        { "age": 7, "weight": 80 },
+        { "age": 8, "weight": 90 },
+        { "age": 9, "weight": 95 },
+        { "age": 10, "weight": 100 },
+        { "age": 11, "weight": 95 },
+        { "age": 12, "weight": 90 },
+        { "age": 13, "weight": 85 },
+        { "age": 14, "weight": 80 },
+        { "age": 15, "weight": 100 },
+        { "age": 16, "weight": 90 },
+        { "age": 17, "weight": 80 },
+        { "age": 18, "weight": 70 },
+        { "age": 19, "weight": 60 },
+        { "age": 20, "weight": 50 },
+        { "age": 21, "weight": 40 },
+        { "age": 22, "weight": 30 },
+        { "age": 23, "weight": 20 },
+        { "age": 24, "weight": 15 },
+        { "age": 25, "weight": 10 },
+        { "age": 26, "weight": 5 },
+        { "age": 27, "weight": 2 },
+        { "age": 28, "weight": 1 },
+        { "age": 29, "weight": 2 },
+        { "age": 30, "weight": 5 },
+        { "age": 31, "weight": 10 },
+        { "age": 32, "weight": 15 },
+        { "age": 33, "weight": 20 },
+        { "age": 34, "weight": 30 },
+        { "age": 35, "weight": 40 },
+        { "age": 36, "weight": 50 },
+        { "age": 37, "weight": 60 },
+        { "age": 38, "weight": 70 },
+        { "age": 39, "weight": 80 },
+        { "age": 40, "weight": 85 },
+        { "age": 41, "weight": 90 },
+        { "age": 42, "weight": 95 },
+        { "age": 43, "weight": 100 },
+        { "age": 44, "weight": 95 },
+        { "age": 45, "weight": 90 },
+        { "age": 46, "weight": 85 },
+        { "age": 47, "weight": 80 },
+        { "age": 48, "weight": 75 },
+        { "age": 49, "weight": 70 },
+        { "age": 50, "weight": 65 },
+        { "age": 51, "weight": 60 },
+        { "age": 52, "weight": 55 },
+        { "age": 53, "weight": 50 },
+        { "age": 54, "weight": 45 },
+        { "age": 55, "weight": 40 },
+        { "age": 56, "weight": 35 },
+        { "age": 57, "weight": 30 },
+        { "age": 58, "weight": 25 },
+        { "age": 59, "weight": 20 },
+        { "age": 60, "weight": 15 },
+        { "age": 61, "weight": 10 },
+        { "age": 62, "weight": 5 },
+        { "age": 63, "weight": 2 },
+        { "age": 64, "weight": 1 },
+        { "age": 65, "weight": 0 },
+        { "age": 66, "weight": 0 },
+        { "age": 67, "weight": 0 },
+        { "age": 68, "weight": 0 },
+        { "age": 69, "weight": 0 },
+        { "age": 70, "weight": 0 },
+        { "age": 71, "weight": 0 },
+        { "age": 72, "weight": 0 },
+        { "age": 73, "weight": 0 },
+        { "age": 74, "weight": 0 },
+        { "age": 75, "weight": 0 },
+        { "age": 76, "weight": 0 },
+        { "age": 77, "weight": 0 },
+        { "age": 78, "weight": 0 },
+        { "age": 79, "weight": 0 },
+        { "age": 80, "weight": 0 },
+        { "age": 81, "weight": 0 },
+        { "age": 82, "weight": 0 },
+        { "age": 83, "weight": 0 },
+        { "age": 84, "weight": 0 },
+        { "age": 85, "weight": 0 },
+        { "age": 86, "weight": 0 },
+        { "age": 87, "weight": 0 },
+        { "age": 88, "weight": 0 },
+        { "age": 89, "weight": 0 },
+        { "age": 90, "weight": 0 },
+        { "age": 91, "weight": 0 },
+        { "age": 92, "weight": 0 },
+        { "age": 93, "weight": 0 },
+        { "age": 94, "weight": 0 },
+        { "age": 95, "weight": 0 },
+        { "age": 96, "weight": 0 },
+        { "age": 97, "weight": 0 },
+        { "age": 98, "weight": 0 },
+        { "age": 99, "weight": 0 },
+        { "age": 100, "weight": 0 }
+      ],
       styles: [
         "Gothic",
         "Victorian",
@@ -165,7 +289,8 @@ export default {
     async generateNewTavern() {
       this.generating = true;
 
-      this.generateTheming();
+      this.chatgptPreprocessor();
+      // this.generateTheming();
 
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
@@ -214,13 +339,10 @@ Return as a JSON object using this framework as a response
       });
 
       this.tavern = JSON.parse(response.choices[0].message.content);
-      let bartenderAges = this.ages;
-      this.tavern.Bartender.Age = bartenderAges;
+      // let bartenderAges = this.ages;
+      // this.tavern.Bartender.Age = bartenderAges;
       console.log(response.choices[0].message.content);
-      let bartenderRace = this.pickedRace.race;
-      this.tavern.Bartender.Race = bartenderRace;
-      this.tavern.Bartender.Gender = this.pickedGender;
-
+      this.chatgptPostprocessor();
 
 
       //this.$store.commit("ADD_TAVERN", tavernInfo);
@@ -230,22 +352,29 @@ Return as a JSON object using this framework as a response
       localStorage.setItem("taverns", tavernsString);
 
       this.generating = false;
-      
+
 
 
     },
-    generateTheming() {
-      this.pickedRace = this.pickWeightedRace();
-      this.pickedGender = this.pickGender().gender;
+    chatgptPreprocessor(){
       let smellNumber = Math.floor(Math.random() * this.tavernSmells.length);
-      this.pickAges();
-      this.pickNaming();
       this.selectedSmell = this.tavernSmells[smellNumber];
-      // console.log(this.selectedSmell);
-      // console.log(pickedRace.race);
+      this.pickNaming();
+      this.pickedGender = this.pickGender().gender;
+    },
+    chatgptPostprocessor() {
+      this.pickedRace = this.pickWeightedRace();
+      let bartenderRace = this.pickedRace.race;
+      this.tavern.Bartender.Race = bartenderRace;
+
       this.pickGender();
-      console.log(this.ages);
-      console.log(this.pickedGender);
+      this.tavern.Bartender.Gender = this.pickedGender;
+
+      this.agePicked = this.pickAges().age;
+      this.pickMinimum();
+      console.log(this.agePicked);
+      console.log(this.pickedMinimum);
+      this.tavern.Bartender.Age = this.pickedMinimum;
     },
     pickWeightedRace() {
       let raceTotal = 0;
@@ -266,8 +395,25 @@ Return as a JSON object using this framework as a response
       return this.races[this.races.length - 1];
     },
     pickAges() {
-      this.ages = Math.floor(Math.random() * 80) + 16;
-      // console.log(ages);
+      let agesTotal = 0;
+      for (let i = 0; i < this.ages.length; i++) {
+        agesTotal += this.ages[i].weight;
+      }
+
+      const agesThreshold = Math.floor(Math.random() * agesTotal);
+
+      agesTotal = 0;
+      for (let i = 0; i < this.ages.length - 1; i++) {
+        agesTotal += this.ages[i].weight;
+
+        if (agesTotal >= agesThreshold) {
+          return this.ages[i];
+        }
+      }
+      return this.ages[this.ages.length - 1];
+    },
+    pickMinimum() {
+      this.pickedMinimum = this.agePicked + 16;
     },
     pickNaming() {
       let nameType = Math.floor(Math.random() * this.nameTypes.length);
@@ -307,6 +453,11 @@ Return as a JSON object using this framework as a response
       this.races.splice(index, 1);
       this.addToLocalStorage();
     },
+    removeTavern(index) {
+      console.log("Remove Tavern" + index);
+      this.taverns.splice(index, 1);
+      this.addToLocalStorage();
+    },
     handleRaceChange(index) {
       console.log(`Handling race change for idx ${index}`);
       let raceElem = document.getElementById("race_" + index);
@@ -328,6 +479,8 @@ Return as a JSON object using this framework as a response
     addToLocalStorage() {
       let racesString = JSON.stringify(this.races);
       localStorage.setItem("races", racesString);
+      let tavernsString = JSON.stringify(this.taverns);
+      localStorage.setItem("taverns", tavernsString);
     },
   },
   created() {
@@ -357,10 +510,10 @@ Return as a JSON object using this framework as a response
       this.races = JSON.parse(racesString);
     }
 
-    if(!localStorage.getItem("taverns")){
+    if (!localStorage.getItem("taverns")) {
       this.taverns = [];
     }
-    else{
+    else {
       let tavernsString = localStorage.getItem("taverns");
       this.taverns = JSON.parse(tavernsString);
     }
@@ -401,10 +554,16 @@ tr:nth-child(even) {
   width: 85%;
 }
 
-.buttonStyle{
-  background-color: #000040;
+.previousTaverns {
+  display: flex;
+  flex-direction: column;
+}
+
+.taverns {
+  margin: 14px;
+  padding: 8px;
+  background-color: #F0F0F0;
+  color: #171717;
   width: 40%;
-  color: #FFFFFF;
-  height: 50px;
 }
 </style>
