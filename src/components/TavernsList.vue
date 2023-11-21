@@ -43,6 +43,16 @@
           {{ curRace.weight }}
         </div>
         <div>
+          <div v-bind:id="'lifespan_' + index" contenteditable="true" spellcheck="false" @blur="handleRaceChange(index)">
+            {{ curRace.raceLifespan }}
+          </div>
+          <div>
+            <div v-bind:id="'minimum_' + index" contenteditable="true" spellcheck="false" @blur="handleRaceChange(index)">
+              {{ curRace.raceMinimum }}
+            </div>
+          </div>
+        </div>
+        <div>
           <button v-on:click="removeRace(index)">Remove</button>
         </div>
       </div>
@@ -50,6 +60,10 @@
         <input class="raceInput" type="text" v-model="newRace.race" />
         <br />
         <input class="raceInput" type="number" v-model="newRace.weight" />
+        <br />
+        <input class="raceInput" type="text" v-model="newRace.raceLifespan" />
+        <br />
+        <input class="raceInput" type="text" v-model="newRace.raceMinimum" />
         <br />
         <button v-on:click="addRace">+</button>
       </div>
@@ -281,6 +295,8 @@ export default {
       newRace: {
         race: "",
         weight: 0,
+        raceLifespan: 0,
+        raceMinimum: 0,
       },
     };
   },
@@ -356,7 +372,7 @@ Return as a JSON object using this framework as a response
 
 
     },
-    chatgptPreprocessor(){
+    chatgptPreprocessor() {
       let smellNumber = Math.floor(Math.random() * this.tavernSmells.length);
       this.selectedSmell = this.tavernSmells[smellNumber];
       this.pickNaming();
@@ -443,9 +459,13 @@ Return as a JSON object using this framework as a response
       let newRaceCopy = {};
       newRaceCopy.race = this.newRace.race;
       newRaceCopy.weight = this.newRace.weight;
+      newRaceCopy.raceLifespan = this.newRace.raceLifespan;
+      newRaceCopy.raceMinimum = this.newRace.raceMinimum;
       this.races.push(newRaceCopy);
       this.newRace.race = "";
       this.newRace.weight = 0;
+      this.newRace.raceLifespan = 0;
+      this.newRace.raceMinimum = 0;
       this.addToLocalStorage();
     },
     removeRace(index) {
@@ -476,6 +496,28 @@ Return as a JSON object using this framework as a response
         this.addToLocalStorage();
       }
     },
+    handleRaceLifespanChange(index){
+      console.log(`Handling race lifespan change for idx ${index}`);
+      let lifespanElem = document.getElementById("lifespan_" + index);
+      if (isNaN(parseInt(lifespaneElem.innerText))){
+        lifespanElem.innerText = this.races[index].raceLifespan;
+      }
+      else{
+        this.races[index].raceLifespan = parseInt(lifespanElem.innerText);
+        this.addToLocalStorage();
+      }
+    },
+    handleRaceMinimumChange(index){
+      console.log(`Handing race minimum change for idx ${index}`);
+      let minimumElem = document.getElementById("minimum_" + index);
+      if (isNaN(parseInt(minimumElem.innerText))){
+        minimumElem.innerText = this.races[index].raceMinimum;
+      }
+      else{
+        this.races[index].raceMinimum = parseInt(minimumElem.innerText);
+        this.addToLocalStorage();
+      }
+    },
     addToLocalStorage() {
       let racesString = JSON.stringify(this.races);
       localStorage.setItem("races", racesString);
@@ -490,18 +532,26 @@ Return as a JSON object using this framework as a response
         {
           race: "human",
           weight: 50,
+          raceLifespan: 100,
+          raceMinimum: 16,
         },
         {
           race: "elf",
           weight: 20,
+          raceLifespan: 100,
+          raceMinimum: 16,
         },
         {
           race: "dwarf",
           weight: 12,
+          raceLifespan: 100,
+          raceMinimum: 16,
         },
         {
           race: "dragonborn",
           weight: 14,
+          raceLifespan: 100,
+          raceMinimum: 16,
         },
       ];
     }
