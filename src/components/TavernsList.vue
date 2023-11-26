@@ -1,6 +1,6 @@
 <template>
-  <div class="generator">
-    <button @click="generateTheming">Generator</button>
+  <div class="generator" v-if="true">
+    <button @click="chatTester">Generator</button>
   </div>
   <div class="taverns-container">
     <div v-if="generating">Generating...</div>
@@ -43,11 +43,13 @@
           {{ curRace.weight }}
         </div>
         <div>
-          <div v-bind:id="'lifespan_' + index" contenteditable="true" spellcheck="false" @blur="handleRaceChange(index)">
+          <div v-bind:id="'lifespan_' + index" contenteditable="true" spellcheck="false"
+            @blur="handleLifespanChange(index)">
             {{ curRace.raceLifespan }}
           </div>
           <div>
-            <div v-bind:id="'minimum_' + index" contenteditable="true" spellcheck="false" @blur="handleRaceChange(index)">
+            <div v-bind:id="'minimum_' + index" contenteditable="true" spellcheck="false"
+              @blur="handleMinimumChange(index)">
               {{ curRace.raceMinimum }}
             </div>
           </div>
@@ -61,9 +63,9 @@
         <br />
         <input class="raceInput" type="number" v-model="newRace.weight" />
         <br />
-        <input class="raceInput" type="text" v-model="newRace.raceLifespan" />
+        <input class="raceInput" type="number" v-model="newRace.raceLifespan" />
         <br />
-        <input class="raceInput" type="text" v-model="newRace.raceMinimum" />
+        <input class="raceInput" type="number" v-model="newRace.raceMinimum" />
         <br />
         <button v-on:click="addRace">+</button>
       </div>
@@ -114,8 +116,6 @@ export default {
       },
       taverns: [],
       setting: "Fantasy",
-      agePicked: 0,
-      pickedMinimum: 0,
       tavernSmells: [
         "Pine",
         "Smoke",
@@ -179,7 +179,7 @@ export default {
           weight: 5,
         }
       ],
-      ages: [
+      agePercentiles: [
         { "age": 0, "weight": 0 },
         { "age": 1, "weight": 5 },
         { "age": 2, "weight": 10 },
@@ -279,8 +279,7 @@ export default {
         { "age": 96, "weight": 0 },
         { "age": 97, "weight": 0 },
         { "age": 98, "weight": 0 },
-        { "age": 99, "weight": 0 },
-        { "age": 100, "weight": 0 }
+        { "age": 99, "weight": 0 }
       ],
       styles: [
         "Gothic",
@@ -307,7 +306,7 @@ export default {
 
       this.chatgptPreprocessor();
       // this.generateTheming();
-
+      console.log("KEY= " + process.env.OPENAI_API_KEY);
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
         dangerouslyAllowBrowser: true,
@@ -355,8 +354,7 @@ Return as a JSON object using this framework as a response
       });
 
       this.tavern = JSON.parse(response.choices[0].message.content);
-      // let bartenderAges = this.ages;
-      // this.tavern.Bartender.Age = bartenderAges;
+
       console.log(response.choices[0].message.content);
       this.chatgptPostprocessor();
 
@@ -372,25 +370,47 @@ Return as a JSON object using this framework as a response
 
 
     },
+    chatTester() {
+      this.chatgptPreprocessor();
+      this.tavern = {
+        "Name": "Good Drinks",
+        "Size": 40,
+        "Quality": {
+          "Cleanliness": 8,
+          "Drinks": 7
+        },
+        "Bartender": {
+          "Name": {
+            "bartenderName": "Johnathan",
+            "phoneticSpelling": "See Above"
+          },
+          "Age": 0
+        }
+      };
+      this.chatgptPostprocessor();
+    },
     chatgptPreprocessor() {
       let smellNumber = Math.floor(Math.random() * this.tavernSmells.length);
       this.selectedSmell = this.tavernSmells[smellNumber];
-      this.pickNaming();
+
+      this.selectedName = this.pickNaming();
+
       this.pickedGender = this.pickGender().gender;
+
+      this.pickedRace = this.pickWeightedRace();
+      console.log(JSON.stringify(this.pickedRace.raceLifespan) + " " + JSON.stringify(this.pickedRace.race));
+
+
     },
     chatgptPostprocessor() {
-      this.pickedRace = this.pickWeightedRace();
+
       let bartenderRace = this.pickedRace.race;
       this.tavern.Bartender.Race = bartenderRace;
 
-      this.pickGender();
       this.tavern.Bartender.Gender = this.pickedGender;
 
-      this.agePicked = this.pickAges().age;
-      this.pickMinimum();
-      console.log(this.agePicked);
-      console.log(this.pickedMinimum);
-      this.tavern.Bartender.Age = this.pickedMinimum;
+      this.selectBartenderAge();
+      console.log(this.tavern.Bartender.Age);
     },
     pickWeightedRace() {
       let raceTotal = 0;
@@ -410,30 +430,32 @@ Return as a JSON object using this framework as a response
       }
       return this.races[this.races.length - 1];
     },
-    pickAges() {
+    pickBartenderAgePercentile() {
       let agesTotal = 0;
-      for (let i = 0; i < this.ages.length; i++) {
-        agesTotal += this.ages[i].weight;
+      for (let i = 0; i < this.agePercentiles.length; i++) {
+        agesTotal += this.agePercentiles[i].weight;
       }
 
       const agesThreshold = Math.floor(Math.random() * agesTotal);
 
       agesTotal = 0;
-      for (let i = 0; i < this.ages.length - 1; i++) {
-        agesTotal += this.ages[i].weight;
+      for (let i = 0; i < this.agePercentiles.length - 1; i++) {
+        agesTotal += this.agePercentiles[i].weight;
 
         if (agesTotal >= agesThreshold) {
-          return this.ages[i];
+          return this.agePercentiles[i];
         }
       }
-      return this.ages[this.ages.length - 1];
+      return this.agePercentiles[this.agePercentiles.length - 1];
     },
-    pickMinimum() {
-      this.pickedMinimum = this.agePicked + 16;
+    selectBartenderAge() {
+      let agePercentile = this.pickBartenderAgePercentile();
+      console.log(this.tavern.Bartender.Age);
+      this.tavern.Bartender.Age = Math.floor((this.pickedRace.raceLifespan - this.pickedRace.raceMinimum) * (agePercentile.age / 100)) + this.pickedRace.raceMinimum;
     },
     pickNaming() {
       let nameType = Math.floor(Math.random() * this.nameTypes.length);
-      this.selectedName = this.nameTypes[nameType];
+      return this.nameTypes[nameType];
     },
     pickGender() {
       let genderTotal = 0;
@@ -496,24 +518,24 @@ Return as a JSON object using this framework as a response
         this.addToLocalStorage();
       }
     },
-    handleRaceLifespanChange(index){
+    handleLifespanChange(index) {
       console.log(`Handling race lifespan change for idx ${index}`);
       let lifespanElem = document.getElementById("lifespan_" + index);
-      if (isNaN(parseInt(lifespaneElem.innerText))){
+      if (isNaN(parseInt(lifespanElem.innerText))) {
         lifespanElem.innerText = this.races[index].raceLifespan;
       }
-      else{
+      else {
         this.races[index].raceLifespan = parseInt(lifespanElem.innerText);
         this.addToLocalStorage();
       }
     },
-    handleRaceMinimumChange(index){
+    handleMinimumChange(index) {
       console.log(`Handing race minimum change for idx ${index}`);
       let minimumElem = document.getElementById("minimum_" + index);
-      if (isNaN(parseInt(minimumElem.innerText))){
+      if (isNaN(parseInt(minimumElem.innerText))) {
         minimumElem.innerText = this.races[index].raceMinimum;
       }
-      else{
+      else {
         this.races[index].raceMinimum = parseInt(minimumElem.innerText);
         this.addToLocalStorage();
       }
@@ -538,19 +560,19 @@ Return as a JSON object using this framework as a response
         {
           race: "elf",
           weight: 20,
-          raceLifespan: 100,
+          raceLifespan: 700,
           raceMinimum: 16,
         },
         {
           race: "dwarf",
           weight: 12,
-          raceLifespan: 100,
+          raceLifespan: 500,
           raceMinimum: 16,
         },
         {
           race: "dragonborn",
           weight: 14,
-          raceLifespan: 100,
+          raceLifespan: 120,
           raceMinimum: 16,
         },
       ];
