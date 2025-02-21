@@ -1,12 +1,16 @@
-import { createRouter as _createRouter, createWebHistory } from 'vue-router';
+import {
+  createRouter as _createRouter,
+  createWebHistory
+} from 'vue-router';
 
 import TavernsView from '../views/TavernsView.vue';
 import MagicShopsView from '../views/MagicShopsView.vue';
 
-const routes = [
-  {
+const routes = [{
     path: '/',
-    redirect: { name: 'taverns' }
+    redirect: {
+      name: 'taverns'
+    }
   },
   {
     path: '/taverns',
@@ -20,9 +24,9 @@ const routes = [
   }
 ];
 
-export function createRouter () {
+export function createRouter() {
   return _createRouter({
-    history: createWebHistory(),
+    history: createWebHistory('/dAndD/'),
     routes: routes
   })
 }

@@ -438,13 +438,14 @@ Return as a JSON object using this framework as a response
       return this.pickWeightedRandomElement(this.ages);
     },
     selectBartenderAge() {
-      let agePercentile = this.pickBartenderAgePercentile();
-      console.log(this.tavern.Bartender.Age);
-      this.tavern.Bartender.Age =
-        Math.floor(
-          (this.pickedRace.raceLifespan - this.pickedRace.raceMinimum) *
-            (agePercentile.age / 100)
-        ) + this.pickedRace.raceMinimum;
+      // let agePercentile = this.pickBartenderAgePercentile();
+      // console.log(this.tavern.Bartender.Age);
+      // this.tavern.Bartender.Age =
+      //   Math.floor(
+      //     (this.pickedRace.raceLifespan - this.pickedRace.raceMinimum) *
+      //       (agePercentile.age / 100)
+      //   ) + this.pickedRace.raceMinimum;
+      return this.pickWeightedRandomElement(this.ages);
     },
     pickNaming() {
       let nameType = Math.floor(Math.random() * this.nameTypes.length);
